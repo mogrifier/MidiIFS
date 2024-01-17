@@ -1,5 +1,8 @@
 package com.erichizdepski.ifs;
 
+import javax.sound.midi.*;
+import java.io.File;
+
 /*
 play tones. Arduino MEGA 1280.
 
@@ -97,6 +100,8 @@ public class Generator {
     */
     void compute_music() {
 
+        int[][] midiData = new int[this.iterations][2];
+
         //starting point for IFS code. Store past and present for iteration.
         float x = 0f;
         float y = 0f;
@@ -149,22 +154,17 @@ public class Generator {
             //constrain the piano key range to one the arduino can play and also not too high since unpleasant
             int piano_key = map(scale_x, 0, 100, 25, MAX_NOTE);
 
-            //assign values to the variable references so changes are seen in the loop function
-            writeMidi(piano_key, scale_y);
+            //add data to integer arrays of Midi data
+            midiData[i][0] = piano_key;
+            midiData[i][1] = scale_y;
+
         }
+
+        //write the midi file
+        Sequence sequence = MidiHelp.getSequence("ifs.mid", midiData);
+        MidiHelp.writeMidiFile(sequence);
     }
 
-
-
-    /**
-     * Intent of this class is to generate a MIDI file. Not meant for realtime playback, but could I suppose.
-     * @param piano_key
-     * @param scale_y
-     */
-    private void writeMidi(int piano_key, int scale_y) {
-        System.out.print(piano_key + "   " + scale_y);
-        System.out.println("");
-    }
 
     /*
     Choose array indices based on a hard-coded probability distribution.
